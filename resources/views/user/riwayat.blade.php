@@ -33,17 +33,17 @@
 
     <div class="offcanvas-body p-0">
         <div class="list-group list-group-flush">
-            <a href="/user" class="list-group-item list-group-item-action">
+            <a href="/user" class="list-group-item list-group-item-action {{ request()->is('user') ? 'active' : '' }}">
                 🏠 Dashboard
             </a>
-            <a href="/riwayat" class="list-group-item list-group-item-action active">
-                📄 Riwayat Transaksi
-            </a>
-            <a href="{{ route('user.beli') }}" class="list-group-item list-group-item-action">
+            <a href="{{ route('user.beli') }}" class="list-group-item list-group-item-action {{ request()->routeIs('user.beli') ? 'active' : '' }}">
                 🛒 Beli Buku
             </a>
-            <a href="{{ route('user.pinjam') }}" class="list-group-item list-group-item-action">
+            <a href="{{ route('user.pinjam') }}" class="list-group-item list-group-item-action {{ request()->routeIs('user.pinjam') ? 'active' : '' }}">
                 📖 Pinjam Buku
+            </a>
+            <a href="/riwayat" class="list-group-item list-group-item-action {{ request()->is('riwayat') ? 'active' : '' }}">
+                📄 Riwayat Transaksi
             </a>
         </div>
         <hr class="my-2">

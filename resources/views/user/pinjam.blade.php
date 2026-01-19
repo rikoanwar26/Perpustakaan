@@ -50,21 +50,16 @@
 
     <div class="offcanvas-body p-0">
         <div class="list-group list-group-flush">
-            <a href="/user" class="list-group-item list-group-item-action">
+            <a href="/user" class="list-group-item list-group-item-action {{ request()->is('user') ? 'active' : '' }}">
                 🏠 Dashboard
             </a>
-
-            <a href="/user/beli" class="list-group-item list-group-item-action active">
+            <a href="{{ route('user.beli') }}" class="list-group-item list-group-item-action {{ request()->routeIs('user.beli') ? 'active' : '' }}">
                 🛒 Beli Buku
             </a>
-
-            <hr class="my-1">
-
-            <a href="/user/pinjam" class="list-group-item list-group-item-action active">
+            <a href="{{ route('user.pinjam') }}" class="list-group-item list-group-item-action {{ request()->routeIs('user.pinjam') ? 'active' : '' }}">
                 📖 Pinjam Buku
             </a>
-
-            <a href="/riwayat" class="list-group-item list-group-item-action">
+            <a href="/riwayat" class="list-group-item list-group-item-action {{ request()->is('riwayat') ? 'active' : '' }}">
                 📄 Riwayat Transaksi
             </a>
         </div>
@@ -171,6 +166,21 @@
                                         </div>
                                     </div>
 
+                                    <div class="mt-3 d-none" id="konfirmasi_diantar_{{ $b->id_buku }}">
+                                        <div class="mb-2">
+                                            <label class="form-label">Nama Penerima</label>
+                                            <input type="text" class="form-control" name="nama_penerima">
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Alamat Lengkap</label>
+                                            <textarea class="form-control" name="alamat_pengantaran" rows="2"></textarea>
+                                        </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">Link Google Maps</label>
+                                            <input type="text" class="form-control" name="link_maps" placeholder="https://maps.app.goo.gl/...">
+                                        </div>
+                                    </div>
+
                                     <div>Biaya pengantaran: <strong>Rp <span id="v_kirim_{{ $b->id_buku }}">0</span></strong></div>
                                     <div class="mt-2">Total: <strong>Rp <span id="v_total_{{ $b->id_buku }}">5.000</span></strong></div>
                                 </div>
@@ -197,6 +207,14 @@
                             document.getElementById('v_pinjam_' + id).textContent = format(biayaPinjam);
                             document.getElementById('v_kirim_' + id).textContent = format(kirim);
                             document.getElementById('v_total_' + id).textContent = format(biayaPinjam + kirim);
+                            const konfirmasi = document.getElementById('konfirmasi_diantar_' + id);
+                            if (konfirmasi) {
+                                if (antar) {
+                                    konfirmasi.classList.remove('d-none');
+                                } else {
+                                    konfirmasi.classList.add('d-none');
+                                }
+                            }
                         }
                         document.getElementById('opt_outlet_' + id).addEventListener('change', sync);
                         document.getElementById('opt_antar_' + id).addEventListener('change', sync);

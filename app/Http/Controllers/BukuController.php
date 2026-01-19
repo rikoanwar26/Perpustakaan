@@ -6,24 +6,16 @@ use App\Models\Buku;
 use App\Models\Kategori;
 use App\Models\Penulis;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class BukuController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | ADMIN / PETUGAS
-    |--------------------------------------------------------------------------
-    */
-
-    // ADMIN - LIST BUKU
     public function index()
     {
         $buku = Buku::with(['kategori', 'penulis'])->get();
-
         return view('petugas.buku.index', compact('buku'));
     }
 
-    // ADMIN - FORM TAMBAH
     public function create()
     {
         return view('petugas.buku.create', [
@@ -32,7 +24,6 @@ class BukuController extends Controller
         ]);
     }
 
-    // ADMIN - SIMPAN
     public function store(Request $request)
     {
         $request->validate([
@@ -41,14 +32,12 @@ class BukuController extends Controller
             'id_penulis' => 'required|exists:penulis,id_penulis',
             'harga' => 'required|numeric|min:0',
             'jumlah_stok' => 'required|integer|min:0',
-            'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-            'tersedia_pinjam' => 'sometimes|boolean',
-            'tersedia_jual' => 'sometimes|boolean',
             'penerbit' => 'nullable|string|max:255',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         Buku::create([
-            'kode_buku' => 'BK-'.strtoupper(uniqid()),
+            'kode_buku' => 'BK-' . strtoupper(Str::random(8)),
             'judul' => $request->judul,
             'id_kategori' => $request->id_kategori,
             'id_penulis' => $request->id_penulis,
@@ -67,7 +56,6 @@ class BukuController extends Controller
             ->with('success', 'Buku berhasil ditambahkan');
     }
 
-    // ADMIN - FORM EDIT
     public function edit(Buku $buku)
     {
         return view('petugas.buku.edit', [
@@ -77,24 +65,23 @@ class BukuController extends Controller
         ]);
     }
 
-    // ADMIN - UPDATE
     public function update(Request $request, Buku $buku)
     {
         $request->validate([
             'judul' => 'required',
             'id_kategori' => 'required',
             'id_penulis' => 'required',
+            'harga' => 'required|numeric|min:0',
             'jumlah_stok' => 'required|integer|min:0',
-            'foto' => 'nullable|image',
-            'tersedia_pinjam' => 'sometimes|boolean',
-            'tersedia_jual' => 'sometimes|boolean',
             'penerbit' => 'nullable|string|max:255',
+            'foto' => 'nullable|image',
         ]);
 
         $data = $request->only([
             'judul',
             'id_kategori',
             'id_penulis',
+            'harga',
             'jumlah_stok',
             'penerbit',
         ]);
@@ -113,7 +100,6 @@ class BukuController extends Controller
             ->with('success', 'Buku berhasil diperbarui');
     }
 
-    // ADMIN - HAPUS
     public function destroy(Buku $buku)
     {
         $buku->delete();
@@ -121,19 +107,5 @@ class BukuController extends Controller
         return redirect()
             ->route('buku.index')
             ->with('success', 'Buku berhasil dihapus');
-    }
-
-    /*
-    |--------------------------------------------------------------------------
-    | USER / PENGGUNA
-    |--------------------------------------------------------------------------
-    */
-
-    // USER - HANYA LIHAT BUKU (TANPA CRUD)
-    public function userIndex()
-    {
-        $buku = Buku::with(['kategori', 'penulis'])->get();
-
-        return view('user.index', compact('buku'));
     }
 }

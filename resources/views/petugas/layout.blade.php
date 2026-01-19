@@ -65,6 +65,10 @@
         <a href="/petugas/transaksi">
             <i class="bi bi-arrow-repeat"></i> Transaksi
         </a>
+
+        <a href="/petugas/pengembalian">
+            <i class="bi bi-arrow-counterclockwise"></i> Pengembalian Buku
+        </a>        
     
         <a href="/logout" class="text-danger">
             <i class="bi bi-box-arrow-right"></i> Logout

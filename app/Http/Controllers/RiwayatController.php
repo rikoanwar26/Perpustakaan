@@ -10,6 +10,7 @@ class RiwayatController extends Controller
     {
         $transaksi = Transaksi::with('detail.buku')
             ->where('id_pengguna', session('id'))
+            ->where('status', '!=', 'Dibatalkan')
             ->orderBy('created_at', 'desc')
             ->get();
 

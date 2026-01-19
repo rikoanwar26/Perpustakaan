@@ -13,23 +13,25 @@ return new class extends Migration
     {
         Schema::create('detail_transaksi', function (Blueprint $table) {
             $table->id('id_detail_transaksi');
-    
+
             $table->unsignedBigInteger('id_transaksi');
             $table->unsignedBigInteger('id_buku');
-    
+
             $table->integer('jumlah');
             $table->integer('total_harga');
-    
+
+            $table->timestamps(); // ✅ WAJIB
+
             $table->foreign('id_transaksi')
                   ->references('id_transaksi')
                   ->on('transaksi')
                   ->cascadeOnDelete();
-    
+
             $table->foreign('id_buku')
                   ->references('id_buku')
                   ->on('buku')
                   ->cascadeOnDelete();
-        });     
+        });
     }
 
     /**
