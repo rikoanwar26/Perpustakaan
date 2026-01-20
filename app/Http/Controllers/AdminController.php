@@ -149,6 +149,63 @@ class AdminController extends Controller
         ]);
     }
 
+    public function rekap()
+    {
+        $jual = Transaksi::with(['detail','pengguna'])
+            ->where('jenis', 'jual')
+            ->where('status', '!=', 'Dibatalkan')
+            ->get();
+
+        $pinjam = Transaksi::with(['detail','pengguna'])
+            ->where('jenis', 'pinjam')
+            ->where('status', '!=', 'Dibatalkan')
+            ->get();
+
+        $pengembalian = \App\Models\Pengembalian::with('transaksi.pengguna')->get();
+        $pengembalianCount = $pengembalian->count();
+        $totalDenda = $pengembalian->sum('denda');
+
+        $data = [
+            'totalTransaksiJual' => $jual->count(),
+            'totalTransaksiPinjam' => $pinjam->count(),
+            'totalBukuDibeli' => $jual->sum(fn($t) => $t->detail->sum('jumlah')),
+            'totalBukuDipinjam' => $pinjam->sum(fn($t) => $t->detail->sum('jumlah')),
+            'totalPemasukanJual' => $jual->sum(fn($t) => $t->detail->sum('total_harga')),
+            'totalBiayaPeminjaman' => $pinjam->sum('biaya_peminjaman'),
+            'totalDikembalikan' => $pengembalianCount,
+            'totalDenda' => $totalDenda,
+            'usersJual' => $jual->groupBy('id_pengguna')->map(function($ts){
+                $u = optional($ts->first()->pengguna);
+                return [
+                    'nama' => $u->nama ?? '-',
+                    'jumlah_transaksi' => $ts->count(),
+                    'total_item' => $ts->sum(fn($t) => $t->detail->sum('jumlah')),
+                    'total_belanja' => $ts->sum(fn($t) => $t->detail->sum('total_harga')),
+                ];
+            })->values(),
+            'usersPinjam' => $pinjam->groupBy('id_pengguna')->map(function($ts){
+                $u = optional($ts->first()->pengguna);
+                return [
+                    'nama' => $u->nama ?? '-',
+                    'jumlah_transaksi' => $ts->count(),
+                    'total_item' => $ts->sum(fn($t) => $t->detail->sum('jumlah')),
+                    'total_biaya_pinjam' => $ts->sum('biaya_peminjaman'),
+                ];
+            })->values(),
+            'usersKembali' => $pengembalian->groupBy(function($p){ return optional($p->transaksi->pengguna)->id_pengguna; })->map(function($ps){
+                $first = $ps->first();
+                $u = optional(optional($first->transaksi)->pengguna);
+                return [
+                    'nama' => $u->nama ?? '-',
+                    'jumlah_kembali' => $ps->count(),
+                    'total_denda' => $ps->sum('denda'),
+                ];
+            })->values(),
+        ];
+
+        return view('petugas.rekap.index', $data);
+    }
+
     public function konfirmasiPembayaran($id)
     {
         $transaksi = Transaksi::with('detail')->findOrFail($id);

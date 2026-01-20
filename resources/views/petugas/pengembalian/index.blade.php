@@ -76,4 +76,58 @@
     </table>
 </div>
 
+<div class="container pb-4">
+    @php
+        $totalTransaksi = $transaksiPinjam->count();
+        $sudahKembali = $transaksiPinjam->filter(function($t){ return (bool) $t->pengembalian; })->count();
+        $masihDipinjam = $transaksiPinjam->filter(function($t){ return ! $t->pengembalian && ($t->status === 'Berhasil'); })->count();
+        $totalDenda = $transaksiPinjam->sum(function($t){ return (int) ($t->pengembalian->denda ?? 0); });
+        $totalBukuDipinjam = $transaksiPinjam->sum(function($t){ return $t->detail->sum('jumlah'); });
+        $totalBukuDikembalikan = $transaksiPinjam->filter(function($t){ return (bool) $t->pengembalian; })->sum(function($t){ return $t->detail->sum('jumlah'); });
+    @endphp
+    <div class="card shadow-sm">
+        <div class="card-header bg-white fw-bold">Rekap Pengembalian</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="text-muted">Total Transaksi Pinjam</div>
+                        <div class="fs-4 fw-bold">{{ $totalTransaksi }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="text-muted">Sudah Dikembalikan</div>
+                        <div class="fs-4 fw-bold text-success">{{ $sudahKembali }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="text-muted">Masih Dipinjam</div>
+                        <div class="fs-4 fw-bold text-warning">{{ $masihDipinjam }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="text-muted">Total Buku Dipinjam</div>
+                        <div class="fs-4 fw-bold">{{ $totalBukuDipinjam }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="text-muted">Total Buku Dikembalikan</div>
+                        <div class="fs-4 fw-bold">{{ $totalBukuDikembalikan }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="border rounded p-3">
+                        <div class="text-muted">Total Denda Terkumpul</div>
+                        <div class="fs-4 fw-bold">Rp {{ number_format($totalDenda, 0, ',', '.') }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection

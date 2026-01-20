@@ -69,6 +69,10 @@
         <a href="/petugas/pengembalian">
             <i class="bi bi-arrow-counterclockwise"></i> Pengembalian Buku
         </a>        
+        
+        <a href="{{ route('admin.rekap') }}">
+            <i class="bi bi-bar-chart-line"></i> Rekap / Laporan
+        </a>
     
         <a href="/logout" class="text-danger">
             <i class="bi bi-box-arrow-right"></i> Logout

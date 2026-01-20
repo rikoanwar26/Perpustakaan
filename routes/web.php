@@ -78,6 +78,9 @@ Route::middleware('admin')->prefix('petugas')->group(function () {
 
     // Proses pengembalian via tombol "Kembalikan"
     Route::post('/pengembalian/{id}', [PengembalianController::class, 'kembalikan'])->name('admin.pengembalian.proses');
+
+    // Rekap/Laporan
+    Route::get('/rekap', [AdminController::class, 'rekap'])->name('admin.rekap');
 });
 
 /*
