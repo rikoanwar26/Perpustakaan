@@ -72,7 +72,7 @@
                         <td>{{ $item->penulis->nama ?? '-' }}</td>
                         <td>{{ $item->penerbit ?? '-' }}</td>
                         <td class="text-center">
-                            <span class="badge bg-info">{{ $item->jumlah_stok }}</span>
+                            <span class="badge bg-info">{{ $item->stok_pinjam }}</span>
                         </td>
                         <td class="text-center">
                             <a href="{{ route('buku.edit', $item) }}" class="btn btn-warning btn-sm">Edit</a>
@@ -121,7 +121,7 @@
                         <td>{{ $item->penulis->nama ?? '-' }}</td>
                         <td>{{ $item->penerbit ?? '-' }}</td>
                         <td class="text-center">
-                            <span class="badge bg-info">{{ $item->jumlah_stok }}</span>
+                            <span class="badge bg-info">{{ $item->stok_jual }}</span>
                         </td>
                         <td class="text-center">
                             <a href="{{ route('buku.edit', $item) }}" class="btn btn-warning btn-sm">Edit</a>

@@ -38,6 +38,18 @@
         <a class="navbar-brand fw-bold" href="/user">
             📚 Perpustakaan
         </a>
+        @php
+            $cart = session('cart', ['jual' => [], 'pinjam' => []]);
+            $totalCount = array_sum($cart['jual']) + array_sum($cart['pinjam']);
+        @endphp
+        <a href="{{ route('cart') }}" class="btn btn-outline-light ms-2 position-relative">
+            🧺 Keranjang
+            @if($totalCount > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ $totalCount }}
+                </span>
+            @endif
+        </a>
     </div>
 </nav>
 
@@ -76,7 +88,15 @@
 
 {{-- CONTENT --}}
 <div class="container py-5">
-    <h3 class="fw-bold mb-4">📖 Pinjam Buku</h3>
+    <h3 class="fw-bold mb-3">📖 Pinjam Buku</h3>
+    <form method="GET" action="{{ route('user.pinjam') }}" class="row g-2 mb-4">
+        <div class="col-sm-9">
+            <input type="search" class="form-control" name="q" value="{{ request('q') }}" placeholder="Cari judul, penulis, kategori, penerbit">
+        </div>
+        <div class="col-sm-3">
+            <button class="btn btn-primary w-100">Cari</button>
+        </div>
+    </form>
 
     @if ($buku->isEmpty())
         <div class="alert alert-warning text-center">
@@ -113,13 +133,13 @@
                             </p>
 
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="badge bg-info text-dark">Stok: {{ $b->jumlah_stok }}</span>
+                                <span class="badge bg-info text-dark">Stok: {{ $b->stok_pinjam }}</span>
                                 <span class="badge {{ $b->tersedia_pinjam ? 'bg-success' : 'bg-secondary' }}">
                                     {{ $b->tersedia_pinjam ? 'Tersedia pinjam' : 'Tidak tersedia' }}
                                 </span>
                             </div>
 
-                            @if ($b->tersedia_pinjam && $b->jumlah_stok > 0)
+                            @if ($b->tersedia_pinjam && $b->stok_pinjam > 0)
                                 <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#pinjamModal-{{ $b->id_buku }}">📖 Pinjam Buku</button>
                                 <form action="{{ route('cart.add') }}" method="POST" class="mt-2">
                                     @csrf
@@ -135,7 +155,7 @@
                     </div>
                 </div>
 
-                @if ($b->tersedia_pinjam && $b->jumlah_stok > 0)
+                @if ($b->tersedia_pinjam && $b->stok_pinjam > 0)
                 <div class="modal fade" id="pinjamModal-{{ $b->id_buku }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -179,6 +199,10 @@
                                             <label class="form-label">Link Google Maps</label>
                                             <input type="text" class="form-control" name="link_maps" placeholder="https://maps.app.goo.gl/...">
                                         </div>
+                                        <div class="mb-2">
+                                            <label class="form-label">No. Telepon</label>
+                                            <input type="text" class="form-control" name="no_telepon" placeholder="08xxxxxxxxxx">
+                                        </div>
                                     </div>
 
                                     <div>Biaya pengantaran: <strong>Rp <span id="v_kirim_{{ $b->id_buku }}">0</span></strong></div>
@@ -211,8 +235,16 @@
                             if (konfirmasi) {
                                 if (antar) {
                                     konfirmasi.classList.remove('d-none');
+                                    ['nama_penerima','alamat_pengantaran','link_maps','no_telepon'].forEach(function(nm){
+                                        const el = konfirmasi.querySelector('[name="'+nm+'"]');
+                                        if (el) el.setAttribute('required','required');
+                                    });
                                 } else {
                                     konfirmasi.classList.add('d-none');
+                                    ['nama_penerima','alamat_pengantaran','link_maps','no_telepon'].forEach(function(nm){
+                                        const el = konfirmasi.querySelector('[name="'+nm+'"]');
+                                        if (el) el.removeAttribute('required');
+                                    });
                                 }
                             }
                         }

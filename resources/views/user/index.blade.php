@@ -24,6 +24,18 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <a class="navbar-brand fw-bold" href="/user">📚 Perpustakaan</a>
+        @php
+            $cart = session('cart', ['jual' => [], 'pinjam' => []]);
+            $totalCount = array_sum($cart['jual']) + array_sum($cart['pinjam']);
+        @endphp
+        <a href="{{ route('cart') }}" class="btn btn-outline-light ms-2 position-relative">
+            🧺 Keranjang
+            @if($totalCount > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {{ $totalCount }}
+                </span>
+            @endif
+        </a>
     </div>
 </nav>
 
@@ -60,7 +72,15 @@
 
 {{-- CONTENT --}}
 <div class="container py-5">
-    <h3 class="fw-bold mb-4">📚 Daftar Buku</h3>
+    <h3 class="fw-bold mb-3">📚 Daftar Buku</h3>
+    <form method="GET" action="/user" class="row g-2 mb-4">
+        <div class="col-sm-9">
+            <input type="search" class="form-control" name="q" value="{{ request('q') }}" placeholder="Cari judul, penulis, kategori, penerbit">
+        </div>
+        <div class="col-sm-3">
+            <button class="btn btn-primary w-100">Cari</button>
+        </div>
+    </form>
 
     {{-- ================= PINJAM ================= --}}
     <h4 class="fw-bold mb-3">📖 Buku Yang Bisa Dipinjam</h4>
@@ -85,7 +105,7 @@
                             <p class="text-muted mb-1">Penulis: {{ $b->penulis?->nama ?? '-' }}</p>
                             <p class="text-muted mb-2">Penerbit: {{ $b->penerbit ?? '-' }}</p>
 
-                            <span class="badge bg-info">Stok: {{ $b->jumlah_stok }}</span>
+                            <span class="badge bg-info">Stok: {{ $b->stok_pinjam }}</span>
                         </div>
 
                         <div class="px-3 pb-3">
@@ -94,7 +114,7 @@
                                 <input type="hidden" name="id_buku" value="{{ $b->id_buku }}">
                                 <input type="hidden" name="jenis" value="pinjam">
                                 <button class="btn btn-outline-secondary btn-sm w-100"
-                                    {{ $b->jumlah_stok <= 0 ? 'disabled' : '' }}>
+                                    {{ ($b->stok_pinjam ?? 0) <= 0 ? 'disabled' : '' }}>
                                     + Keranjang Pinjam
                                 </button>
                             </form>
@@ -132,7 +152,7 @@
                                 Rp {{ number_format($b->harga, 0, ',', '.') }}
                             </p>
 
-                            <span class="badge bg-info">Stok: {{ $b->jumlah_stok }}</span>
+                            <span class="badge bg-info">Stok: {{ $b->stok_jual }}</span>
                         </div>
 
                         <div class="px-3 pb-3">
@@ -141,7 +161,7 @@
                                 <input type="hidden" name="id_buku" value="{{ $b->id_buku }}">
                                 <input type="hidden" name="jenis" value="jual">
                                 <button class="btn btn-outline-primary btn-sm w-100"
-                                    {{ $b->jumlah_stok <= 0 ? 'disabled' : '' }}>
+                                    {{ ($b->stok_jual ?? 0) <= 0 ? 'disabled' : '' }}>
                                     + Keranjang Beli
                                 </button>
                             </form>

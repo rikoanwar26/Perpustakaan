@@ -39,16 +39,6 @@
                             <input type="hidden" name="jual[{{ $b->id_buku }}]" value="{{ $cart['jual'][$b->id_buku] ?? 1 }}">
                         </div>
                     @endforeach
-
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="opt_jual" id="opt_jual_outlet" value="outlet" checked>
-                        <label class="form-check-label" for="opt_jual_outlet">Ambil di outlet</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="opt_jual" id="opt_jual_antar" value="antar">
-                        <label class="form-check-label" for="opt_jual_antar">Diantar (Rp 10.000)</label>
-                    </div>
-                    <input type="hidden" name="biaya_jual" id="kirim_jual" value="0">
                 @endif
 
                 {{-- Untuk Dipinjam --}}
@@ -65,16 +55,40 @@
                             <input type="hidden" name="pinjam[{{ $b->id_buku }}]" value="{{ $cart['pinjam'][$b->id_buku] ?? 1 }}">
                         </div>
                     @endforeach
+                @endif
 
+                {{-- Metode pengantaran (gabungan) --}}
+                @if(count($jualItems) > 0 || count($pinjamItems) > 0)
+                    <hr>
+                    <h6 class="fw-bold">Metode Pengantaran</h6>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="opt_pinjam" id="opt_pinjam_outlet" value="outlet" checked>
-                        <label class="form-check-label" for="opt_pinjam_outlet">Ambil di outlet</label>
+                        <input class="form-check-input" type="radio" name="opt_pengantaran" id="opt_pengantaran_outlet" value="outlet" checked>
+                        <label class="form-check-label" for="opt_pengantaran_outlet">Ambil di outlet</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="opt_pinjam" id="opt_pinjam_antar" value="antar">
-                        <label class="form-check-label" for="opt_pinjam_antar">Diantar (Rp 10.000)</label>
+                        <input class="form-check-input" type="radio" name="opt_pengantaran" id="opt_pengantaran_antar" value="antar">
+                        <label class="form-check-label" for="opt_pengantaran_antar">Diantar (Rp 10.000)</label>
                     </div>
-                    <input type="hidden" name="biaya_pinjam" id="kirim_pinjam" value="0">
+                    <input type="hidden" name="biaya_pengantaran" id="biaya_pengantaran" value="0">
+                    
+                    <div class="mt-3 d-none" id="konfirmasi_diantar_cart">
+                        <div class="mb-2">
+                            <label class="form-label">Nama Penerima</label>
+                            <input type="text" class="form-control" name="nama_penerima">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Alamat Lengkap</label>
+                            <textarea class="form-control" name="alamat_pengantaran" rows="2"></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Link Google Maps</label>
+                            <input type="text" class="form-control" name="link_maps" placeholder="https://maps.app.goo.gl/...">
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">No. Telepon</label>
+                            <input type="text" class="form-control" name="no_telepon" placeholder="08xxxxxxxxxx">
+                        </div>
+                    </div>
                 @endif
 
                 @if(count($jualItems) > 0 || count($pinjamItems) > 0)
@@ -89,18 +103,27 @@
 </div>
 
 <script>
-document.getElementById('opt_jual_outlet')?.addEventListener('change', function(){
-    document.getElementById('kirim_jual').value = 0;
+document.getElementById('opt_pengantaran_outlet')?.addEventListener('change', function(){
+    document.getElementById('biaya_pengantaran').value = 0;
+    const konfirmasi = document.getElementById('konfirmasi_diantar_cart');
+    if (konfirmasi) {
+        konfirmasi.classList.add('d-none');
+        ['nama_penerima','alamat_pengantaran','link_maps','no_telepon'].forEach(function(nm){
+            const el = konfirmasi.querySelector('[name="'+nm+'"]');
+            if (el) el.removeAttribute('required');
+        });
+    }
 });
-document.getElementById('opt_jual_antar')?.addEventListener('change', function(){
-    document.getElementById('kirim_jual').value = 10000;
-});
-
-document.getElementById('opt_pinjam_outlet')?.addEventListener('change', function(){
-    document.getElementById('kirim_pinjam').value = 0;
-});
-document.getElementById('opt_pinjam_antar')?.addEventListener('change', function(){
-    document.getElementById('kirim_pinjam').value = 10000;
+document.getElementById('opt_pengantaran_antar')?.addEventListener('change', function(){
+    document.getElementById('biaya_pengantaran').value = 10000;
+    const konfirmasi = document.getElementById('konfirmasi_diantar_cart');
+    if (konfirmasi) {
+        konfirmasi.classList.remove('d-none');
+        ['nama_penerima','alamat_pengantaran','link_maps','no_telepon'].forEach(function(nm){
+            const el = konfirmasi.querySelector('[name="'+nm+'"]');
+            if (el) el.setAttribute('required','required');
+        });
+    }
 });
 </script>
 

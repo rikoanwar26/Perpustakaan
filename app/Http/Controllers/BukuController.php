@@ -31,7 +31,8 @@ class BukuController extends Controller
             'id_kategori' => 'required|exists:kategori,id_kategori',
             'id_penulis' => 'required|exists:penulis,id_penulis',
             'harga' => 'required|numeric|min:0',
-            'jumlah_stok' => 'required|integer|min:0',
+            'stok_pinjam' => 'required|integer|min:0',
+            'stok_jual' => 'required|integer|min:0',
             'penerbit' => 'nullable|string|max:255',
             'foto' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
@@ -42,7 +43,9 @@ class BukuController extends Controller
             'id_kategori' => $request->id_kategori,
             'id_penulis' => $request->id_penulis,
             'harga' => $request->harga,
-            'jumlah_stok' => $request->jumlah_stok,
+            'stok_pinjam' => $request->stok_pinjam,
+            'stok_jual' => $request->stok_jual,
+            'jumlah_stok' => (int)$request->stok_pinjam + (int)$request->stok_jual,
             'tersedia_pinjam' => $request->boolean('tersedia_pinjam'),
             'tersedia_jual' => $request->boolean('tersedia_jual'),
             'penerbit' => $request->penerbit,
@@ -72,7 +75,8 @@ class BukuController extends Controller
             'id_kategori' => 'required',
             'id_penulis' => 'required',
             'harga' => 'required|numeric|min:0',
-            'jumlah_stok' => 'required|integer|min:0',
+            'stok_pinjam' => 'required|integer|min:0',
+            'stok_jual' => 'required|integer|min:0',
             'penerbit' => 'nullable|string|max:255',
             'foto' => 'nullable|image',
         ]);
@@ -82,10 +86,12 @@ class BukuController extends Controller
             'id_kategori',
             'id_penulis',
             'harga',
-            'jumlah_stok',
+            'stok_pinjam',
+            'stok_jual',
             'penerbit',
         ]);
 
+        $data['jumlah_stok'] = (int)$request->stok_pinjam + (int)$request->stok_jual;
         $data['tersedia_pinjam'] = $request->boolean('tersedia_pinjam');
         $data['tersedia_jual'] = $request->boolean('tersedia_jual');
 

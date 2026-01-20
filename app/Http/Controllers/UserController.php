@@ -7,21 +7,63 @@ use App\Models\Buku;
 
 class UserController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-        $buku = Buku::all();
+        $q = trim($request->get('q', ''));
+        $buku = Buku::with(['kategori', 'penulis'])
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('judul', 'like', "%{$q}%")
+                        ->orWhere('penerbit', 'like', "%{$q}%")
+                        ->orWhereHas('kategori', function ($k) use ($q) {
+                            $k->where('nama', 'like', "%{$q}%");
+                        })
+                        ->orWhereHas('penulis', function ($p) use ($q) {
+                            $p->where('nama', 'like', "%{$q}%");
+                        });
+                });
+            })
+            ->get();
         return view('user.index', compact('buku'));
     }
 
-    public function beli()
+    public function beli(Request $request)
     {
-        $buku = Buku::all();
+        $q = trim($request->get('q', ''));
+        $buku = Buku::with(['kategori', 'penulis'])
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('judul', 'like', "%{$q}%")
+                        ->orWhere('penerbit', 'like', "%{$q}%")
+                        ->orWhereHas('kategori', function ($k) use ($q) {
+                            $k->where('nama', 'like', "%{$q}%");
+                        })
+                        ->orWhereHas('penulis', function ($p) use ($q) {
+                            $p->where('nama', 'like', "%{$q}%");
+                        });
+                });
+            })
+            ->get();
         return view('user.beli', compact('buku'));
     }
 
-    public function pinjam()
+    public function pinjam(Request $request)
     {
-        $buku = Buku::all();
+        $q = trim($request->get('q', ''));
+        $buku = Buku::with(['kategori', 'penulis'])
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('judul', 'like', "%{$q}%")
+                        ->orWhere('penerbit', 'like', "%{$q}%")
+                        ->orWhereHas('kategori', function ($k) use ($q) {
+                            $k->where('nama', 'like', "%{$q}%");
+                        })
+                        ->orWhereHas('penulis', function ($p) use ($q) {
+                            $p->where('nama', 'like', "%{$q}%");
+                        });
+                });
+            })
+            ->get();
         return view('user.pinjam', compact('buku'));
     }
 }

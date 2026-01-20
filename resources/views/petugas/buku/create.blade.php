@@ -45,8 +45,13 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Stok Buku</label>
-                <input type="number" name="jumlah_stok" class="form-control" min="0" required>
+                <label class="form-label">Stok Pinjam</label>
+                <input type="number" name="stok_pinjam" class="form-control" min="0" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Stok Jual</label>
+                <input type="number" name="stok_jual" class="form-control" min="0" required>
             </div>
 
             <div class="mb-3">

@@ -59,14 +59,23 @@
                 </select>
             </div>
 
-            {{-- STOK --}}
+            {{-- STOK TERPISAH --}}
             <div class="mb-3">
-                <label class="form-label">Jumlah Stok</label>
+                <label class="form-label">Stok Pinjam</label>
                 <input type="number"
-                       name="jumlah_stok"
+                       name="stok_pinjam"
                        class="form-control"
                        min="0"
-                       value="{{ old('jumlah_stok', $buku->jumlah_stok) }}"
+                       value="{{ old('stok_pinjam', $buku->stok_pinjam) }}"
+                       required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Stok Jual</label>
+                <input type="number"
+                       name="stok_jual"
+                       class="form-control"
+                       min="0"
+                       value="{{ old('stok_jual', $buku->stok_jual) }}"
                        required>
             </div>
 

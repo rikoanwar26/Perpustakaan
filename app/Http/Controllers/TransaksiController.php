@@ -29,13 +29,20 @@ class TransaksiController extends Controller
             'metode_pengantaran' => 'nullable|string|in:outlet,antar',
             'biaya_pengantaran' => 'nullable|integer|min:0',
             'biaya_peminjaman' => 'nullable|integer|min:0',
+            'nama_penerima' => 'required_if:metode_pengantaran,antar|string|max:255',
+            'alamat_pengantaran' => 'required_if:metode_pengantaran,antar|string|max:500',
+            'link_maps' => 'required_if:metode_pengantaran,antar|string|max:255',
+            'no_telepon' => 'required_if:metode_pengantaran,antar|string|max:20',
         ]);
 
         $buku = Buku::findOrFail($request->id_buku);
 
-        // CEK STOK JIKA BELI
-        if ($request->jenis === 'jual' && $buku->jumlah_stok < 1) {
+        // CEK STOK SESUAI JENIS
+        if ($request->jenis === 'jual' && (int)$buku->stok_jual < 1) {
             return back()->with('error', 'Stok buku habis ❌');
+        }
+        if ($request->jenis === 'pinjam' && (int)$buku->stok_pinjam < 1) {
+            return back()->with('error', 'Stok pinjam habis ❌');
         }
 
         // SIMPAN TRANSAKSI
@@ -111,27 +118,38 @@ class TransaksiController extends Controller
             return back()->with('error', 'Keranjang kosong');
         }
 
+        // Validasi data pengantaran gabungan
+        $request->validate([
+            'opt_pengantaran' => 'nullable|in:outlet,antar',
+            'biaya_pengantaran' => 'nullable|integer|min:0',
+            'nama_penerima' => 'required_if:opt_pengantaran,antar|string|max:255',
+            'alamat_pengantaran' => 'required_if:opt_pengantaran,antar|string|max:500',
+            'link_maps' => 'required_if:opt_pengantaran,antar|string|max:255',
+            'no_telepon' => 'required_if:opt_pengantaran,antar|string|max:20',
+        ]);
+
+        $opt = $request->input('opt_pengantaran', 'outlet');
+        $biaya_pengantaran = (int) $request->input('biaya_pengantaran', 0);
+
         // **Buat transaksi jual**
         if (! empty($cart['jual'])) {
             $jualIds = array_keys($cart['jual']);
             $jualItems = Buku::whereIn('id_buku', $jualIds)->get()->keyBy('id_buku');
 
-            // Validasi stok
+            // Validasi stok jual
             foreach ($cart['jual'] as $id => $qty) {
-                if (($jualItems[$id]->jumlah_stok ?? 0) < $qty) {
+                if (($jualItems[$id]->stok_jual ?? 0) < $qty) {
                     return back()->with('error', 'Stok tidak cukup untuk buku yang dibeli');
                 }
             }
-
-            $biaya_jual = (int) $request->input('biaya_jual', 0);
 
             $transaksiJual = Transaksi::create([
                 'id_pengguna' => $userId,
                 'jenis' => 'jual',
                 'status' => 'Menunggu Pembayaran',
                 'tanggal' => now(),
-                'metode_pengantaran' => $request->input('opt_jual', 'outlet'),
-                'biaya_pengantaran' => $biaya_jual,
+                'metode_pengantaran' => $opt,
+                'biaya_pengantaran' => ! empty($cart['pinjam']) ? $biaya_pengantaran : $biaya_pengantaran,
             ]);
 
             foreach ($cart['jual'] as $id => $qty) {
@@ -150,6 +168,13 @@ class TransaksiController extends Controller
             $pinjamIds = array_keys($cart['pinjam']);
             $pinjamItems = Buku::whereIn('id_buku', $pinjamIds)->get()->keyBy('id_buku');
 
+            // Validasi stok pinjam
+            foreach ($cart['pinjam'] as $id => $qty) {
+                if (($pinjamItems[$id]->stok_pinjam ?? 0) < $qty) {
+                    return back()->with('error', 'Stok tidak cukup untuk buku yang dipinjam');
+                }
+            }
+
             $biaya_pinjam = (int) $request->input('biaya_pinjam', 0);
 
             $transaksiPinjam = Transaksi::create([
@@ -158,7 +183,8 @@ class TransaksiController extends Controller
                 'status' => 'Menunggu Pembayaran',
                 'tanggal' => now(),
                 'jatuh_tempo' => now()->addDays(5),
-                'metode_pengantaran' => $request->input('opt_pinjam', 'outlet'),
+                'metode_pengantaran' => $opt,
+                'biaya_pengantaran' => empty($cart['jual']) ? $biaya_pengantaran : 0,
                 'biaya_peminjaman' => $biaya_pinjam,
             ]);
 
@@ -201,7 +227,7 @@ class TransaksiController extends Controller
         // Jika sebelumnya stok sudah dikurangi di proses lama, kembalikan untuk jenis jual
         if ($transaksi->jenis === 'jual') {
             foreach ($transaksi->detail as $d) {
-                Buku::where('id_buku', $d->id_buku)->increment('jumlah_stok', $d->jumlah);
+                Buku::where('id_buku', $d->id_buku)->increment('stok_jual', $d->jumlah);
             }
         }
         $transaksi->update(['status' => 'Dibatalkan']);

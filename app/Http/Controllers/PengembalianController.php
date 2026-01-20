@@ -44,10 +44,15 @@ class PengembalianController extends Controller
             'kondisi_buku' => $request->kondisi_buku,
         ]);
 
-        $transaksi = Transaksi::find($request->id_transaksi);
+        $transaksi = Transaksi::with('detail')->find($request->id_transaksi);
         if ($transaksi) {
             $transaksi->status = 'Dikembalikan';
             $transaksi->save();
+            if ($transaksi->jenis === 'pinjam') {
+                foreach ($transaksi->detail as $d) {
+                    Buku::where('id_buku', $d->id_buku)->increment('stok_pinjam', $d->jumlah);
+                }
+            }
         }
 
         $pesan = 'Pengembalian berhasil ditambahkan. Kondisi: ' .

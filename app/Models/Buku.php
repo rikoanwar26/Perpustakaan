@@ -21,6 +21,8 @@ class Buku extends Model
         'id_penulis',
         'harga',
         'jumlah_stok',
+        'stok_pinjam',
+        'stok_jual',
         'tersedia_pinjam',
         'tersedia_jual',
         'foto',

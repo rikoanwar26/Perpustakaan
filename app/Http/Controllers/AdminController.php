@@ -156,7 +156,13 @@ class AdminController extends Controller
         if ($transaksi->jenis === 'jual') {
             foreach ($transaksi->detail as $d) {
                 Buku::where('id_buku', $d->id_buku)
-                    ->decrement('jumlah_stok', $d->jumlah);
+                    ->decrement('stok_jual', $d->jumlah);
+            }
+        }
+        if ($transaksi->jenis === 'pinjam') {
+            foreach ($transaksi->detail as $d) {
+                Buku::where('id_buku', $d->id_buku)
+                    ->decrement('stok_pinjam', $d->jumlah);
             }
         }
 
@@ -173,7 +179,7 @@ class AdminController extends Controller
         $transaksi = Transaksi::with('detail')->findOrFail($id);
         if ($transaksi->jenis === 'jual' && $transaksi->status === 'Berhasil') {
             foreach ($transaksi->detail as $d) {
-                Buku::where('id_buku', $d->id_buku)->increment('jumlah_stok', $d->jumlah);
+                Buku::where('id_buku', $d->id_buku)->increment('stok_jual', $d->jumlah);
             }
         }
         $transaksi->detail()->delete();
